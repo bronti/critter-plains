@@ -82,7 +82,7 @@ fun runVisualization(game: Game, cellSize: Int, fps: Int) = application {
                         drawer.fill = ColorRGBa.BLACK.opacify(0.6)
                         drawer.stroke = null
 
-                        val font = loadFont("data/fonts/default.otf", 50.0)
+                        val font = loadFont("data/fonts/default.otf", 20.0)
                         drawer.fontMap = font
 
 //                        val bounds = drawer.fontImage.characterBounds(label)

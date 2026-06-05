@@ -76,6 +76,8 @@ class Memory(initialPosition: Position) {
     private val territories = mutableMapOf<Position, Pair<Territory, TimeStamp>>()
     private val critters = mutableMapOf<Position, Pair<CritterName, TimeStamp>>()
 
+    fun area(): Set<Position> = territories.keys + critters.keys
+
     fun update(world: World.Observable, myPosition: Position) {
         ++time
         position = myPosition
@@ -83,11 +85,11 @@ class Memory(initialPosition: Position) {
         positionsInRadius().forEach { updateForPosition(world, it) }
     }
 
-    fun terrain(pos: Position) = territories[pos]?.first
+    fun territory(pos: Position) = territories[pos]?.first
 
     fun occupied(pos: Position) = critters.containsKey(pos)
 
-    fun traversable(pos: Position) = !occupied(pos) && terrain(pos)?.traversable == true
+    fun traversable(pos: Position) = !occupied(pos) && territory(pos)?.traversable == true
 
     fun closestFiltered(predicate: (Position, Territory, CritterName?) -> Boolean): Position? =
         territories.entries

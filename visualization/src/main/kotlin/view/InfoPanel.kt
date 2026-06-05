@@ -1,6 +1,6 @@
 package view
 
-import critters.critter.Critter
+import critters.CritterStateView
 import org.openrndr.color.ColorRGBa
 import org.openrndr.draw.Drawer
 import org.openrndr.draw.FontImageMap
@@ -17,7 +17,7 @@ class InfoPanel(
     private val padding = 16.0
     private val lineHeight = 28.0
 
-    fun render(selectedCritter: Critter?) {
+    fun render(selectedCritter: CritterStateView?) {
         drawer.stroke = null
         drawer.fill = background
         drawer.rectangle(xOffset, 0.0, width, height)

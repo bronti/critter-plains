@@ -33,14 +33,10 @@ class Game(val mapWidth: Int, val mapHeight: Int, critterCount: Int) {
         world = WorldState(map, critters)
     }
 
-    interface State {
-        fun territory(pos: Position): Territory
-        fun occupant(pos: Position): Critter?
-    }
-
     fun tick() = world.tick()
-    fun state(): State = object : State {
+
+    fun stateView() = object : GameStateView {
         override fun territory(pos: Position) = world.territory(pos)
-        override fun occupant(pos: Position) = world.occupant(pos)
+        override fun occupant(pos: Position) = world.occupant(pos)?.view()
     }
 }

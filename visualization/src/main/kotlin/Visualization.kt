@@ -1,103 +1,53 @@
 import critters.Game
-import critters.world.Position
-import critters.world.World
-import org.openrndr.KEY_SPACEBAR
+import input.InputHandler
 import org.openrndr.application
-import org.openrndr.color.ColorRGBa
-import org.openrndr.draw.isolatedWithTarget
+import org.openrndr.draw.RenderTarget
 import org.openrndr.draw.loadFont
 import org.openrndr.draw.renderTarget
+import simulation.SimulationController
+import simulation.world
+import view.BufferedWorldView
+import view.HudView
+import view.InfoPanel
+
+private const val INFO_PANEL_WIDTH = 200.0
 
 fun runVisualization(game: Game, cellSize: Int, fps: Int) = application {
     configure {
-        width = game.mapWidth * cellSize
+        width = game.mapWidth * cellSize + INFO_PANEL_WIDTH.toInt()
         height = game.mapHeight * cellSize
-        title = "Terrain Map ${width}x$height"
+        title = "Critter Plains"
     }
 
     program {
-        val updateInterval = 1.0 / fps
-        var lastUpdateTime = -updateInterval
-        var paused = false
+        val font = loadFont("data/fonts/default.otf", 20.0)
 
-        keyboard.keyDown.listen {
-            if (it.key == KEY_SPACEBAR) paused = !paused
-        }
+        val controller = SimulationController(game, fps, seconds, cellSize)
 
-        val mapBuffer = renderTarget(width, height) {
+        val buffer: RenderTarget = renderTarget(width, height) {
             colorBuffer()
         }
+        val worldView = BufferedWorldView(drawer, controller.world, cellSize, buffer)
+        val hudView = HudView(drawer, font)
+        val infoPanel = InfoPanel(drawer, font, width - INFO_PANEL_WIDTH, INFO_PANEL_WIDTH, height.toDouble())
+        val inputHandler = InputHandler(this, controller)
 
-        fun updateMap(world: Game.State) {
-            drawer.isolatedWithTarget(mapBuffer) {
-                clear(ColorRGBa.BLACK)
-                stroke = null
-
-                for (x in 0 until game.mapWidth) {
-                    for (y in 0 until game.mapHeight) {
-                        val pos = Position(x, y)
-                        fill = ColorRGBa.fromHex(world.territory(pos).hexColor)
-                        rectangle(
-                            cellSize * x.toDouble(),
-                            cellSize * y.toDouble(),
-                            cellSize.toDouble(),
-                            cellSize.toDouble()
-                        )
-                        val occupant = world.occupant(pos)
-                        if (occupant != null) {
-                            fill = ColorRGBa.BLACK
-                            val halfCellSize = cellSize / 2
-                            circle(
-                                (cellSize * x + halfCellSize).toDouble(),
-                                (cellSize * y + halfCellSize).toDouble(),
-                                halfCellSize.toDouble()
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        inputHandler.setup()
 
         extend {
-            if (!paused && seconds - lastUpdateTime >= updateInterval) {
-                game.tick()
-                updateMap(game.state())
-                lastUpdateTime = seconds
+            controller.update(seconds)
+
+            worldView.render()
+
+            drawer.image(buffer.colorBuffer(0), 0.0, 0.0, width.toDouble(), height.toDouble())
+
+            val mousePos = mouse.position
+            val hoveredCritter = controller.world.occupant(mousePos)
+            if (hoveredCritter != null) {
+                hudView.render(hoveredCritter, mousePos)
             }
 
-            drawer.image(mapBuffer.colorBuffer(0), 0.0, 0.0, width.toDouble(), height.toDouble())
-
-            if (paused) {
-                val world = game.state()
-                val mousePos = mouse.position
-                val cellX = (mousePos.x / cellSize).toInt()
-                val cellY = (mousePos.y / cellSize).toInt()
-                if (cellX in 0 until game.mapWidth && cellY in 0 until game.mapHeight) {
-                    val pos = Position(cellX, cellY)
-                    val occupant = world.occupant(pos)
-                    if (occupant != null) {
-                        val label = "${occupant.name}, hunger: ${occupant.hunger}"
-                        val textX = mousePos.x + 10.0
-                        val textY = mousePos.y - 10.0
-                        drawer.fill = ColorRGBa.BLACK.opacify(0.6)
-                        drawer.stroke = null
-
-                        val font = loadFont("data/fonts/default.otf", 20.0)
-                        drawer.fontMap = font
-
-//                        val bounds = drawer.fontImage.characterBounds(label)
-//                        val padding = 4.0
-//                        drawer.rectangle(
-//                            textX - padding,
-//                            textY - bounds.height - padding,
-//                            bounds.width + padding * 2,
-//                            bounds.height + padding * 2
-//                        )
-                        drawer.fill = ColorRGBa.WHITE
-                        drawer.text(label, textX, textY)
-                    }
-                }
-            }
+            infoPanel.render(controller.selectedCritter)
         }
     }
 }

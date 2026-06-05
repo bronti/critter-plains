@@ -28,6 +28,6 @@ class InputHandler(private val program: Program, private val controller: Simulat
     }
 
     private fun onMouseClicked(position: Vector2) {
-        controller.selectAt(position.x, position.y)
+        controller.selectAt(position)
     }
 }

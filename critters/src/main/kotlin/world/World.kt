@@ -18,6 +18,8 @@ interface World {
     }
 }
 
+data class WorldStats(val time: TimeStamp, val population: Int, val avgHunger: Double)
+
 class WorldState(initMap: MutableGameMap, initialPlacement: Map<Critter, Position>) {
     var time: TimeStamp = 0
         private set
@@ -27,6 +29,12 @@ class WorldState(initMap: MutableGameMap, initialPlacement: Map<Critter, Positio
 
     fun territory(pos: Position) = gameMap.territory(pos)
     fun occupant(pos: Position) = placement.occupant(pos)
+
+    fun stats(): WorldStats {
+        val population = placement.values
+        val avgHunger = if (population.isEmpty()) 0.0 else population.sumOf { it.hunger } / population.size.toDouble()
+        return WorldStats(time, population.size, avgHunger)
+    }
 
     fun tick() {
         ++time

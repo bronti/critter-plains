@@ -35,6 +35,8 @@ class Game(val mapWidth: Int, val mapHeight: Int, critterCount: Int) {
 
     fun tick() = world.tick()
 
+    fun stats() = world.stats()
+
     fun stateView() = object : GameStateView {
         override fun territory(pos: Position) = world.territory(pos)
         override fun occupant(pos: Position) = world.occupant(pos)?.view()

@@ -86,11 +86,7 @@ critter-plains/
 │   ├── _log.ps1                       # Logs commands and file reads to cmd.log
 │   └── analyze-log.ps1                # Updates patterns.md and AI_STATUS.md from cmd.log
 │
-├── .continue/rules/
-│   ├── AI_ARCH.md                     # Stable architecture reference (auto-injected by Continue)
-│   ├── AI_STATUS.md                   # Current TODOs and session state (auto-injected)
-│   ├── patterns.md                    # Observed shell mistakes / corrections (auto-injected)
-│   └── project.md                     # AI workflow rules (auto-injected)
+├── .continue/rules/                   # Retired Continue setup, kept as reference — superseded by .claude/
 │
 ├── build.gradle.kts                   # Root build — app plugin, Shadow JAR, dependency updates
 ├── settings.gradle.kts                # Declares subprojects: critters, visualization
@@ -104,6 +100,19 @@ critter-plains/
 | `gridSize` | 50 | World dimensions (50×50 tiles) |
 | `cellPixelSize` | 15 | Pixels per tile |
 | `fps` | 5 | Simulation ticks per second |
+
+### Key types
+
+| Type | Module | Role |
+|---|---|---|
+| `Game` | critters | Facade. `tick()` advances sim. `state()` returns a read-only snapshot. |
+| `WorldState` | critters | Mutable sim state. Holds map + placement. Runs the tick loop. |
+| `Critter` | critters | `name: CritterName`, `hunger: Int`, `memory: Memory`, `isAlive: Boolean` |
+| `Memory` | critters | Per-critter fog-of-war. Tracks territories and critters seen within sight radius. |
+| `Intention` | critters | `EXPLORE`, `EAT` (implemented); `COMMUNICATE`, `PROCREATE` (not yet) |
+| `Territory` | critters | Sealed type. Subtype `Terrain`: `GROUND`, `SOIL`, `FOOD` |
+| `Position` | critters | `data class(x: Int, y: Int)`. Has `distance()` |
+| `SimulationController` | visualization | Bridges OPENRNDR's `seconds` clock to the game loop. Owns pause/speed/selection. |
 
 ## Development Workflow
 

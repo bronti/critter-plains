@@ -12,19 +12,19 @@ import view.InfoPanel
 
 private const val INFO_PANEL_WIDTH = 200.0
 
-fun runVisualization(game: Game, cellSize: Int, fps: Int) = application {
+fun runVisualization(game: Game, cellSize: Int, fps: Int, viewportWidth: Int, viewportHeight: Int) = application {
     configure {
-        width = game.mapWidth * cellSize + INFO_PANEL_WIDTH.toInt()
-        height = game.mapHeight * cellSize
+        width = viewportWidth + INFO_PANEL_WIDTH.toInt()
+        height = viewportHeight
         title = "Critter Plains"
     }
 
     program {
         val font = loadFont("data/fonts/default.otf", 20.0)
 
-        val controller = SimulationController(game, fps, seconds, cellSize)
+        val controller = SimulationController(game, fps, seconds, cellSize, viewportWidth, viewportHeight)
 
-        val buffer: RenderTarget = renderTarget(width, height) {
+        val buffer: RenderTarget = renderTarget(viewportWidth, viewportHeight) {
             colorBuffer()
         }
         val worldView = BufferedWorldView(drawer, controller.world, cellSize, buffer)

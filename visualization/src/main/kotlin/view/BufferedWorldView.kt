@@ -19,14 +19,16 @@ class BufferedWorldView(
 
         val cellSizeD = cellSize.toDouble()
 
-        for (x in 0 until world.mapWidth) {
-            for (y in 0 until world.mapHeight) {
-                val pos = Vector2(x * cellSizeD, y * cellSizeD)
-                fill = ColorRGBa.fromHex(world.territory(pos).hexColor)
-                rectangle(pos.x, pos.y, cellSizeD, cellSizeD)
-                if (world.occupied(pos)) {
+        for (col in 0 until world.width) {
+            for (row in 0 until world.height) {
+                val screenX = col * cellSizeD
+                val screenY = row * cellSizeD
+                val screenPos = Vector2(screenX, screenY)
+                fill = ColorRGBa.fromHex(world.territory(screenPos).hexColor)
+                rectangle(screenX, screenY, cellSizeD, cellSizeD)
+                if (world.occupied(screenPos)) {
                     fill = ColorRGBa.BLACK
-                    circle(pos.x + cellSize / 2.0, pos.y + cellSize / 2.0, cellSize / 2.0)
+                    circle(screenX + cellSize / 2.0, screenY + cellSize / 2.0, cellSize / 2.0)
                 }
             }
         }

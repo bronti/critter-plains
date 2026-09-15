@@ -7,10 +7,23 @@ import critters.world.Position
 import critters.world.Territory
 import org.openrndr.math.Vector2
 
-class SimulationController(private val game: Game, initialFps: Int, initialTime: Double, private val cellSize: Int) {
+class SimulationController(
+    private val game: Game,
+    initialFps: Int,
+    initialTime: Double,
+    private val cellSize: Int,
+    val viewportWidthPx: Int,
+    val viewportHeightPx: Int,
+) {
 
-    val mapWidth: Int get() = game.mapWidth
-    val mapHeight: Int get() = game.mapHeight
+    private val mapWidth: Int get() = game.mapWidth
+    private val mapHeight: Int get() = game.mapHeight
+
+    internal val visibleCols: Int get() = viewportWidthPx / cellSize
+    internal val visibleRows: Int get() = viewportHeightPx / cellSize
+
+    private var viewportX: Int = 0
+    private var viewportY: Int = 0
 
     var state: GameStateView = game.stateView()
         private set
@@ -45,9 +58,14 @@ class SimulationController(private val game: Game, initialFps: Int, initialTime:
         }
     }
 
+    fun scroll(dx: Int, dy: Int) {
+        viewportX = (viewportX + dx).coerceIn(0, maxOf(0, mapWidth - visibleCols))
+        viewportY = (viewportY + dy).coerceIn(0, maxOf(0, mapHeight - visibleRows))
+    }
+
     fun mapPosition(pos: Vector2): Position? {
-        val cellX = (pos.x / cellSize).toInt()
-        val cellY = (pos.y / cellSize).toInt()
+        val cellX = (pos.x / cellSize).toInt() + viewportX
+        val cellY = (pos.y / cellSize).toInt() + viewportY
         return if (cellX in 0 until mapWidth && cellY in 0 until mapHeight)
             Position(cellX, cellY)
         else null

@@ -1,5 +1,6 @@
 package simulation
 
+import ai.Chronicler
 import critters.CritterStateView
 import critters.Game
 import critters.GameStateView
@@ -31,6 +32,9 @@ class SimulationController(
     var selectedCritter: CritterStateView? = null
         private set
 
+    private val chronicler = Chronicler()
+    val chronicle: String get() = chronicler.latestChronicle
+
     var paused: Boolean = false
         private set
     var fps: Int = initialFps
@@ -55,6 +59,7 @@ class SimulationController(
             game.tick()
             state = game.stateView()
             lastUpdateTime = seconds
+            chronicler.maybeUpdate(game.stats())
         }
     }
 

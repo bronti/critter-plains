@@ -17,7 +17,7 @@ class InfoPanel(
     private val padding = 16.0
     private val lineHeight = 28.0
 
-    fun render(selectedCritter: CritterStateView?) {
+    fun render(selectedCritter: CritterStateView?, chronicle: String = "") {
         drawer.stroke = null
         drawer.fill = background
         drawer.rectangle(xOffset, 0.0, width, height)
@@ -29,5 +29,30 @@ class InfoPanel(
             drawer.text("Name:   ${selectedCritter.name}", xOffset + padding, padding + lineHeight)
             drawer.text("Hunger: ${selectedCritter.hunger}", xOffset + padding, padding + lineHeight * 2)
         }
+
+        if (chronicle.isNotBlank()) {
+            drawer.fontMap = font
+            drawer.fill = textColor
+            val chronicleTop = height - padding - lineHeight * (wrap(chronicle).size - 1)
+            wrap(chronicle).forEachIndexed { i, line ->
+                drawer.text(line, xOffset + padding, chronicleTop + lineHeight * i)
+            }
+        }
+    }
+
+    private fun wrap(text: String, maxCharsPerLine: Int = 22): List<String> {
+        val words = text.split(" ")
+        val lines = mutableListOf<String>()
+        var current = StringBuilder()
+        for (word in words) {
+            if (current.isNotEmpty() && current.length + 1 + word.length > maxCharsPerLine) {
+                lines += current.toString()
+                current = StringBuilder()
+            }
+            if (current.isNotEmpty()) current.append(" ")
+            current.append(word)
+        }
+        if (current.isNotEmpty()) lines += current.toString()
+        return lines
     }
 }

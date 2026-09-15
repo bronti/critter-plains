@@ -47,7 +47,7 @@ fun runVisualization(game: Game, cellSize: Int, fps: Int, viewportWidth: Int, vi
                 hudView.render(hoveredCritter, mousePos)
             }
 
-            infoPanel.render(controller.selectedCritter)
+            infoPanel.render(controller.selectedCritter, controller.chronicle)
         }
     }
 }

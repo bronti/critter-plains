@@ -1,4 +1,5 @@
 application.log
+.env
 **/build/
 out/
 **/.idea/

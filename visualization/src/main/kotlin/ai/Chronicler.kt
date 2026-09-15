@@ -10,6 +10,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
@@ -17,6 +18,17 @@ import java.net.http.HttpResponse
 import java.time.Duration
 
 private val logger = KotlinLogging.logger {}
+
+private fun readDotEnv(key: String): String? =
+    File(".env").takeIf { it.isFile }
+        ?.readLines()
+        ?.asSequence()
+        ?.map { it.trim() }
+        ?.firstOrNull { it.startsWith("$key=") }
+        ?.substringAfter("=")
+        ?.trim()
+        ?.trim('"', '\'')
+        ?.takeIf { it.isNotBlank() }
 
 @Serializable
 private data class AnthropicMessage(val role: String, val content: String)
@@ -39,7 +51,7 @@ class Chronicler(
     private val model: String = "claude-haiku-4-5",
     private val minTicksBetweenCalls: Int = 100,
 ) {
-    private val apiKey = System.getenv("ANTHROPIC_API_KEY")
+    private val apiKey = System.getenv("ANTHROPIC_API_KEY") ?: readDotEnv("ANTHROPIC_API_KEY")
     private val enabled = !apiKey.isNullOrBlank()
 
     private val client: HttpClient = HttpClient.newBuilder()

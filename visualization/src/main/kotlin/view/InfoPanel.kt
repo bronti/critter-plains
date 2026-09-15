@@ -33,8 +33,9 @@ class InfoPanel(
         if (chronicle.isNotBlank()) {
             drawer.fontMap = font
             drawer.fill = textColor
-            val chronicleTop = height - padding - lineHeight * (wrap(chronicle).size - 1)
-            wrap(chronicle).forEachIndexed { i, line ->
+            val lines = wrap(chronicle)
+            val chronicleTop = height - padding - lineHeight * (lines.size - 1)
+            lines.forEachIndexed { i, line ->
                 drawer.text(line, xOffset + padding, chronicleTop + lineHeight * i)
             }
         }

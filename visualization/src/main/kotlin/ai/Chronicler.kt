@@ -58,6 +58,8 @@ class Chronicler(
 
     private var lastCallTick = -minTicksBetweenCalls
     private var lastPopulation = -1
+
+    @Volatile
     private var inFlight = false
 
     fun maybeUpdate(stats: WorldStats) {

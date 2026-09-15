@@ -12,3 +12,10 @@ ffmpegOutput.txt
 ShaderError.glsl
 scripts/
 .continue/
+
+# Claude Code: static/shareable parts (CLAUDE.md, .claude/settings.json,
+# .claude/hooks/*.ps1) are committed; generated/local parts are not.
+.claude/context/status.md
+.claude/context/patterns.md
+.claude/logs/
+.claude/settings.local.json

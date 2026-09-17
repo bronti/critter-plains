@@ -41,10 +41,10 @@ OPENRNDR extend {}
   ├── BufferedWorldView.render()             # tiles + critters → off-screen buffer
   ├── drawer.image(buffer)                   # blit to screen
   ├── HudView.render(hoveredCritter)         # tooltip on mouse hover
-  └── InfoPanel.render(selectedCritter)      # right-side details panel
+  └── InfoPanel.render(selectedCritter, chronicle)  # right-side details panel + AI narration
 ```
 
-`SimulationController` is the bridge: it converts OPENRNDR screen coordinates (`Vector2`) to simulation grid `Position`, owns pause/speed state, and gates `game.tick()` to the configured frame rate.
+`SimulationController` is the bridge: it converts OPENRNDR screen coordinates (`Vector2`) to simulation grid `Position`, owns pause/speed state, and gates `game.tick()` to the configured frame rate. It also owns a `Chronicler`, called via `maybeUpdate(game.stats())` on every `update()` — `Chronicler` throttles itself internally (every 100 ticks, or on a population drop) and calls the Anthropic Messages API off the render thread, exposing the latest narration as `chronicle`. Requires `ANTHROPIC_API_KEY` (env var or local `.env`); degrades to a static fallback line if unset or on any API failure — never blocks or crashes the render loop.
 
 ## Directory Structure
 
@@ -66,13 +66,15 @@ critter-plains/
 │
 ├── visualization/src/main/kotlin/     # :visualization subproject — OPENRNDR rendering
 │   ├── Visualization.kt               # runVisualization() — wires OPENRNDR program
+│   ├── ai/
+│   │   └── Chronicler.kt              # Anthropic API narration of WorldStats, throttled + async
 │   ├── simulation/
-│   │   ├── SimulationController.kt    # Tick throttle, pause, speed, critter selection
+│   │   ├── SimulationController.kt    # Tick throttle, pause, speed, critter selection, owns Chronicler
 │   │   └── WorldData.kt              # Interface for screen-space world queries
 │   ├── view/
 │   │   ├── BufferedWorldView.kt       # Renders tiles + critters to off-screen RenderTarget
 │   │   ├── HudView.kt                 # Mouse-hover tooltip
-│   │   └── InfoPanel.kt              # Right-side selected-critter details panel
+│   │   └── InfoPanel.kt              # Right-side selected-critter details panel + chronicle text
 │   └── input/
 │       └── InputHandler.kt            # Space = pause/resume; click = select critter
 │
@@ -113,6 +115,7 @@ critter-plains/
 | `Territory` | critters | Sealed type. Subtype `Terrain`: `GROUND`, `SOIL`, `FOOD` |
 | `Position` | critters | `data class(x: Int, y: Int)`. Has `distance()` |
 | `SimulationController` | visualization | Bridges OPENRNDR's `seconds` clock to the game loop. Owns pause/speed/selection. |
+| `Chronicler` | visualization | Calls the Anthropic Messages API to narrate `WorldStats` in one sentence. Throttled, async (`Dispatchers.IO`), degrades to a fallback line on any failure. |
 
 ## Development Workflow
 

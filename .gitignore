@@ -20,3 +20,7 @@ scripts/
 .claude/context/patterns.md
 .claude/logs/
 .claude/settings.local.json
+
+# BMad-Method plugin — local install, not part of this project's own tooling
+.claude/skills/bmad-*/
+_bmad/

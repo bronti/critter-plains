@@ -47,10 +47,15 @@ class Critter(val name: CritterName, pos: Position) {
         hunger = max(0, hunger - 10)
     }
 
-    fun intent() = when {
-        hunger > 20 -> Intention.EAT
-        hunger > 10 && memory.closestEdible()?.distance(memory.position)?.let { it < 3 } ?: false -> Intention.EAT
-        else -> Intention.EXPLORE
+    fun intent(): Intention {
+        val closestEdible = memory.closestEdible()
+        val distanceToEdible = closestEdible?.distance(memory.position)
+        return when {
+            hunger > 30 -> Intention.EAT
+            hunger > 20 && distanceToEdible?.let { it < 3 } ?: false -> Intention.EAT
+            distanceToEdible?.let { it > 10 } ?: false -> Intention.EAT
+            else -> Intention.EXPLORE
+        }
     }
 }
 

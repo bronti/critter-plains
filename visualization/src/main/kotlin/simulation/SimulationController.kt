@@ -23,8 +23,7 @@ class SimulationController(
     internal val visibleCols: Int get() = viewportWidthPx / cellSize
     internal val visibleRows: Int get() = viewportHeightPx / cellSize
 
-    private var viewportX: Int = 0
-    private var viewportY: Int = 0
+    private val camera = Camera(mapWidth, mapHeight, visibleCols, visibleRows, cellSize)
 
     var state: GameStateView = game.stateView()
         private set
@@ -63,16 +62,7 @@ class SimulationController(
         }
     }
 
-    fun scroll(dx: Int, dy: Int) {
-        viewportX = (viewportX + dx).coerceIn(0, maxOf(0, mapWidth - visibleCols))
-        viewportY = (viewportY + dy).coerceIn(0, maxOf(0, mapHeight - visibleRows))
-    }
+    fun scroll(dx: Int, dy: Int) = camera.pan(dx, dy)
 
-    fun mapPosition(pos: Vector2): Position? {
-        val cellX = (pos.x / cellSize).toInt() + viewportX
-        val cellY = (pos.y / cellSize).toInt() + viewportY
-        return if (cellX in 0 until mapWidth && cellY in 0 until mapHeight)
-            Position(cellX, cellY)
-        else null
-    }
+    fun mapPosition(pos: Vector2): Position? = camera.mapPosition(pos)
 }

@@ -35,6 +35,8 @@ fun runVisualization(game: Game, cellSize: Int, fps: Int, viewportWidth: Int, vi
         inputHandler.setup()
 
         extend {
+            inputHandler.pollHeldKeys()
+
             controller.update(seconds)
 
             worldView.render()

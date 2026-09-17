@@ -65,4 +65,54 @@ class InputHandlerTest {
     fun `speed scales the delta`() {
         assertEquals(0 to -5, panDelta(setOf("w"), 5))
     }
+
+    @Test
+    fun `equals key zooms in`() {
+        assertEquals(1.25, zoomFactorForKey("="))
+    }
+
+    @Test
+    fun `keypad plus key zooms in same as equals`() {
+        assertEquals(1.25, zoomFactorForKey("+"))
+    }
+
+    @Test
+    fun `minus key zooms out`() {
+        assertEquals(1.0 / 1.25, zoomFactorForKey("-"))
+    }
+
+    @Test
+    fun `a non-zoom key returns no zoom factor`() {
+        assertEquals(null, zoomFactorForKey("w"))
+    }
+
+    @Test
+    fun `scrolling up zooms in`() {
+        assertEquals(1.1, zoomFactorForScroll(1.0))
+    }
+
+    @Test
+    fun `scrolling down zooms out`() {
+        assertEquals(1.0 / 1.1, zoomFactorForScroll(-1.0))
+    }
+
+    @Test
+    fun `zero vertical scroll produces no zoom factor`() {
+        assertEquals(null, zoomFactorForScroll(0.0))
+    }
+
+    @Test
+    fun `cursor inside the map viewport is over the map`() {
+        assertEquals(true, isOverMapViewport(x = 100.0, viewportWidthPx = 200))
+    }
+
+    @Test
+    fun `cursor over the info panel is not over the map`() {
+        assertEquals(false, isOverMapViewport(x = 250.0, viewportWidthPx = 200))
+    }
+
+    @Test
+    fun `cursor exactly at the viewport boundary is not over the map`() {
+        assertEquals(false, isOverMapViewport(x = 200.0, viewportWidthPx = 200))
+    }
 }

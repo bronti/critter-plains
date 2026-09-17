@@ -5,8 +5,6 @@ import critters.world.Territory
 import org.openrndr.math.Vector2
 
 interface World {
-    val width: Int
-    val height: Int
     fun territory(pos: Vector2): Territory
     fun occupied(pos: Vector2): Boolean
     fun occupant(pos: Vector2): CritterStateView?
@@ -14,9 +12,6 @@ interface World {
 
 val SimulationController.world: World
     get() = object : World {
-        override val width = visibleCols
-        override val height = visibleRows
-
         override fun territory(pos: Vector2): Territory =
             mapPosition(pos)?.let { state.territory(it) } ?: critters.world.VOID
 

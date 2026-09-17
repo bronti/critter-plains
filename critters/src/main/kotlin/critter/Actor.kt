@@ -1,7 +1,6 @@
 package critters.critter
 
 import critters.world.Position
-import critters.world.Terrain
 import critters.world.World
 import kotlin.math.abs
 import kotlin.math.max
@@ -14,12 +13,11 @@ fun act(intent: Intention, critter: Critter, from: Position, world: World.Intera
     when (intent) {
         Intention.EXPLORE -> exploreAction(critter, from, world)
         Intention.EAT -> {
-            val closestFood = memory.closestFiltered { _, location, occupant ->
-                location is Terrain && critter.edible(location) && (occupant == null || occupant == critter.name)
-            }
+            val closestFood = memory.closestEdible()
             if (closestFood == null) exploreAction(critter, from, world)
             else goEatAction(critter, from, closestFood, world)
         }
+
         else -> throw NotImplementedError()
     }
 }

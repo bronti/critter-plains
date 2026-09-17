@@ -17,7 +17,7 @@ class CritterNameGenerator {
 
 class Critter(val name: CritterName, pos: Position) {
 
-    val memory: Memory = Memory(pos)
+    val memory: Memory = Memory(pos, this)
 
     var isAlive = true
         private set
@@ -32,7 +32,7 @@ class Critter(val name: CritterName, pos: Position) {
         memory.update(world, pos)
     }
 
-    fun tick(): Unit {
+    fun tick() {
         require(isAlive) { "Dead ones dont tick." }
         hunger = min(40, hunger + 1)
         if (hunger >= 40) {
@@ -47,9 +47,11 @@ class Critter(val name: CritterName, pos: Position) {
         hunger = max(0, hunger - 10)
     }
 
-    fun intent() =
-        if (hunger > 10) Intention.EAT
-        else Intention.EXPLORE
+    fun intent() = when {
+        hunger > 20 -> Intention.EAT
+        hunger > 10 && memory.closestEdible()?.distance(memory.position)?.let { it < 3 } ?: false -> Intention.EAT
+        else -> Intention.EXPLORE
+    }
 }
 
 // contract: critter always remembers its position correctly
@@ -64,7 +66,8 @@ class Critter(val name: CritterName, pos: Position) {
 //       - critters real position is hold only in Population = good!
 //       - confusing
 //       - teleportation works
-class Memory(initialPosition: Position) {
+// todo: uninitialized critter possible leak
+class Memory(initialPosition: Position, val critter: Critter) {
     var position: Position = initialPosition
         private set
     var time: TimeStamp = 0
@@ -90,6 +93,16 @@ class Memory(initialPosition: Position) {
     fun occupied(pos: Position) = critters.containsKey(pos)
 
     fun traversable(pos: Position) = !occupied(pos) && territory(pos)?.traversable == true
+
+    fun closestEdible(): Position? =
+        closestAccessibleFiltered { _, territory, _ ->
+            territory is Terrain && critter.edible(territory)
+        }
+
+    fun closestAccessibleFiltered(predicate: (Position, Territory, CritterName?) -> Boolean): Position? =
+        closestFiltered { position, territory, occupant ->
+            predicate(position, territory, occupant) && (occupant == null || occupant == critter.name)
+        }
 
     fun closestFiltered(predicate: (Position, Territory, CritterName?) -> Boolean): Position? =
         territories.entries

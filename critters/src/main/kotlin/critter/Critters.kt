@@ -75,6 +75,8 @@ class Critter(val name: CritterName, pos: Position) {
 class Memory(initialPosition: Position, val critter: Critter) {
     var position: Position = initialPosition
         private set
+    // todo: immutable to access
+    val trace: MutableList<Position> = mutableListOf(initialPosition)
     var time: TimeStamp = 0
         private set
 
@@ -89,7 +91,7 @@ class Memory(initialPosition: Position, val critter: Critter) {
     fun update(world: World.Observable, myPosition: Position) {
         ++time
         position = myPosition
-
+        trace.addLast(myPosition)
         positionsInRadius().forEach { updateForPosition(world, it) }
     }
 

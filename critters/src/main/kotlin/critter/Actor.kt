@@ -33,16 +33,14 @@ fun goEatAction(critter: Critter, from: Position, closestFood: Position, world: 
 }
 
 fun exploreAction(critter: Critter, from: Position, world: World.Interactive) {
-    val coordinateShifts = listOf(-1, +1)
-    val positions = coordinateShifts
-        .flatMap { shift ->
-            listOf(
-                Position(from.x + shift, from.y),
-                Position(from.x, from.y + shift),
-            )
-        }
-        .shuffled()
-    moveToOneOf(critter, positions, world)
+    critter.memory.pointsOfInterest
+        .map { it to critter.memory.lastSeen(it) }
+        .sortedWith(
+            compareBy<Pair<Position, TimeStamp?>> { it.second }
+                .thenBy { from.distance(it.first) }
+        )
+        .lastOrNull()
+        ?.let { moveOneStep(critter, from, it.first, world) }
 }
 
 // todo: pathfinding

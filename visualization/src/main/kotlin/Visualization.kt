@@ -9,6 +9,7 @@ import simulation.world
 import view.BufferedWorldView
 import view.HudView
 import view.InfoPanel
+import view.OverlayView
 
 private const val INFO_PANEL_WIDTH = 200.0
 
@@ -28,6 +29,7 @@ fun runVisualization(game: Game, cellSize: Int, fps: Int, viewportWidth: Int, vi
             colorBuffer()
         }
         val worldView = BufferedWorldView(drawer, controller.world, buffer)
+        val overlayView = OverlayView(drawer)
         val hudView = HudView(drawer, font)
         val infoPanel = InfoPanel(drawer, font, width - INFO_PANEL_WIDTH, INFO_PANEL_WIDTH, height.toDouble())
         val inputHandler = InputHandler(this, controller)
@@ -42,6 +44,15 @@ fun runVisualization(game: Game, cellSize: Int, fps: Int, viewportWidth: Int, vi
             worldView.render(cellSize = controller.cellSize, viewportX = controller.viewportX, viewportY = controller.viewportY)
 
             drawer.image(buffer.colorBuffer(0), 0.0, 0.0, width.toDouble(), height.toDouble())
+
+            overlayView.render(
+                selectedCritter = controller.selectedCritter,
+                cellSize = controller.cellSize,
+                viewportX = controller.viewportX,
+                viewportY = controller.viewportY,
+                viewportWidthPx = controller.viewportWidthPx,
+                viewportHeightPx = controller.viewportHeightPx
+            )
 
             val mousePos = mouse.position
             val hoveredCritter = controller.world.occupant(mousePos)

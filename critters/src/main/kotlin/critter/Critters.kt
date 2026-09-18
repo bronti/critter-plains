@@ -86,17 +86,37 @@ class Memory(initialPosition: Position, val critter: Critter) {
     private val territories = mutableMapOf<Position, Pair<Territory, TimeStamp>>()
     private val critters = mutableMapOf<Position, Pair<CritterName, TimeStamp>>()
 
+    private val _pointsOfInterest = mutableSetOf<Position>()
+    val pointsOfInterest: Set<Position> get() = _pointsOfInterest
+
     fun area(): Set<Position> = territories.keys + critters.keys
 
     fun update(world: World.Observable, myPosition: Position) {
         ++time
         position = myPosition
         trace.addLast(myPosition)
-        positionsInRadius().forEach { updateForPosition(world, it) }
+        positionsInRadius().forEach { position ->
+            updateForPosition(world, position)
+            territory(position)?.let { territory ->
+                if (territory is Terrain && critter.edible(territory)) {
+                    _pointsOfInterest.add(position)
+                } else {
+                    _pointsOfInterest.remove(position)
+                }
+                if (occupied(position)) {
+                    _pointsOfInterest.add(position)
+                    // todo: remove old position
+                }
+            }
+        }
+        _pointsOfInterest.remove(position)
     }
 
     fun territory(pos: Position) = territories[pos]?.first
 
+    fun lastSeen(pos: Position) = territories[pos]?.second
+
+    // todo: stale data
     fun occupied(pos: Position) = critters.containsKey(pos)
 
     fun traversable(pos: Position) = !occupied(pos) && territory(pos)?.traversable == true

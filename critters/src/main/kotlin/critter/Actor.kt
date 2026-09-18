@@ -56,7 +56,8 @@ private fun moveOneStep(critter: Critter, from: Position, to: Position, world: W
 }
 
 private fun moveToOneOf(critter: Critter, to: List<Position>, world: World.Interactive) {
-    to.firstOrNull { critter.memory.traversable(it) }
+    to.filter { critter.memory.traversable(it) }
+        .randomOrNull()
         ?.let {
             world.moveIfPossible(critter, it)
         }

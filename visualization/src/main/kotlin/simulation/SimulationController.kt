@@ -15,6 +15,7 @@ class SimulationController(
     initialCellSize: Int,
     val viewportWidthPx: Int,
     val viewportHeightPx: Int,
+    private val chronicler: Chronicler = Chronicler(),
 ) {
 
     private val mapWidth: Int get() = game.mapWidth
@@ -35,7 +36,6 @@ class SimulationController(
     var selectedCritter: CritterStateView? = null
         private set
 
-    private val chronicler = Chronicler()
     val chronicle: String get() = chronicler.latestChronicle
 
     var paused: Boolean = false
@@ -53,6 +53,10 @@ class SimulationController(
         selectedCritter = mapPosition(pos)?.let { state.occupant(it) }
     }
 
+    fun deselect() {
+        selectedCritter = null
+    }
+
     fun togglePause() {
         paused = !paused
     }
@@ -61,6 +65,7 @@ class SimulationController(
         if (!paused && seconds - lastUpdateTime >= updateInterval) {
             game.tick()
             state = game.stateView()
+            selectedCritter = selectedCritter?.let { state.critter(it.name) }
             lastUpdateTime = seconds
             chronicler.maybeUpdate(game.stats())
         }

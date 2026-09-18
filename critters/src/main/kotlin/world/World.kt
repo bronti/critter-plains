@@ -30,6 +30,15 @@ class WorldState(initMap: MutableGameMap, initialPlacement: Map<Critter, Positio
     fun territory(pos: Position) = gameMap.territory(pos)
     fun occupant(pos: Position) = placement.occupant(pos)
 
+    // Intentional O(n) linear scan over the (small) population, not a new name->Critter index on
+    // MutablePlacement; excluded from World.Observable since it's an identity lookup for
+    // :visualization's selection tracking, not sim-loop observation. Prior to this story this was
+    // called once per click (selectAt); now :visualization calls it every tick to re-resolve the
+    // active selection, so it stays live and auto-clears when the critter dies or is removed. It's
+    // a deliberate identity-based lookup that bypasses fog-of-war/visibility filtering (unlike
+    // Memory-based queries elsewhere) — appropriate only for this UI-selection purpose.
+    fun critter(name: CritterName): Critter? = placement.values.find { it.name == name }
+
     fun stats(): WorldStats {
         val population = placement.values
         val avgHunger = if (population.isEmpty()) 0.0 else population.sumOf { it.hunger } / population.size.toDouble()

@@ -1,5 +1,6 @@
 package input
 
+import org.openrndr.KEY_ESCAPE
 import org.openrndr.KEY_SPACEBAR
 import org.openrndr.KeyTracker
 import org.openrndr.Program
@@ -80,6 +81,7 @@ class InputHandler(private val program: Program, private val controller: Simulat
         program.keyboard.keyDown.listen { event ->
             when (event.key) {
                 KEY_SPACEBAR -> controller.togglePause()
+                KEY_ESCAPE -> controller.deselect()
             }
             zoomFactorForKey(event.name)?.let { factor -> controller.zoom(viewportCenter(), factor) }
         }

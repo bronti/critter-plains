@@ -22,7 +22,6 @@ class InfoPanel(
         drawer.fill = background
         drawer.rectangle(xOffset, 0.0, width, height)
 
-        // todo: critter death
         if (selectedCritter != null) {
             drawer.fontMap = font
             drawer.fill = textColor

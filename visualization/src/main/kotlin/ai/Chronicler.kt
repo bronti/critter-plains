@@ -50,9 +50,10 @@ private data class AnthropicResponse(val content: List<AnthropicContentBlock>)
 class Chronicler(
     private val model: String = "claude-haiku-4-5",
     private val minTicksBetweenCalls: Int = 100,
+    forceDisabled: Boolean = false,
 ) {
     private val apiKey = System.getenv("ANTHROPIC_API_KEY") ?: readDotEnv("ANTHROPIC_API_KEY")
-    private val enabled = !apiKey.isNullOrBlank()
+    private val enabled = !forceDisabled && !apiKey.isNullOrBlank()
 
     private val client: HttpClient = HttpClient.newBuilder()
         .connectTimeout(Duration.ofSeconds(5))

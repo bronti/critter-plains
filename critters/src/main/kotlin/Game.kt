@@ -1,6 +1,7 @@
 package critters
 
 import critters.critter.Critter
+import critters.critter.CritterName
 import critters.critter.CritterNameGenerator
 import critters.world.*
 
@@ -40,5 +41,6 @@ class Game(val mapWidth: Int, val mapHeight: Int, critterCount: Int) {
     fun stateView() = object : GameStateView {
         override fun territory(pos: Position) = world.territory(pos)
         override fun occupant(pos: Position) = world.occupant(pos)?.view()
+        override fun critter(name: CritterName) = world.critter(name)?.view()
     }
 }

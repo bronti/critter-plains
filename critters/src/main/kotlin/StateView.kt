@@ -10,6 +10,7 @@ import critters.world.Territory
 interface GameStateView {
     fun territory(pos: Position): Territory
     fun occupant(pos: Position): CritterStateView?
+    fun critter(name: CritterName): CritterStateView?
 }
 
 data class CritterStateView(

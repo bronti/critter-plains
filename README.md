@@ -11,9 +11,12 @@ A creature simulation.
 ## Controls
 
 - **`W`/`A`/`S`/`D` or arrow keys** — hold to pan the camera continuously; hold two perpendicular keys to pan diagonally. Panning clamps at the map edges.
+- **Scroll wheel** — zoom in/out, anchored at the cursor.
+- **`+`/`-`** — zoom in/out one step at a time, anchored at the viewport center.
 - **Spacebar** — pause / resume the simulation.
 - **Hover** over a critter — shows a tooltip with its name and current hunger.
-- **Click** a critter — selects it; its name and hunger appear in the right-side info panel, alongside an AI-generated narration of the population's state (updates periodically; needs `ANTHROPIC_API_KEY`, otherwise falls back to a static line).
+- **Click** a critter — selects it; its name and hunger stay live in the right-side info panel as they change, alongside an AI-generated narration of the population's state (updates periodically; needs `ANTHROPIC_API_KEY`, otherwise falls back to a static line). While selected, tiles the critter hasn't explored yet are tinted on the map.
+- **Click** an empty tile or another critter, or press **`Escape`** — deselects (or switches selection). Selection also clears automatically if the critter dies.
 
 ## Critter Behaviour
 

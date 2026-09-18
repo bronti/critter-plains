@@ -37,9 +37,11 @@ WorldState.tick()
 
 ```
 OPENRNDR extend {}
-  ├── SimulationController.update(seconds)   # throttled tick at configured FPS
+  ├── InputHandler.pollHeldKeys()            # continuous WASD/arrow pan, polled once per frame
+  ├── SimulationController.update(seconds)   # throttled tick at configured FPS; re-resolves selection, advances Camera
   ├── BufferedWorldView.render()             # tiles + critters → off-screen buffer
   ├── drawer.image(buffer)                   # blit to screen
+  ├── OverlayView.render()                   # memory fog-of-war tint on the selected critter's unexplored tiles
   ├── HudView.render(hoveredCritter)         # tooltip on mouse hover
   └── InfoPanel.render(selectedCritter, chronicle)  # right-side details panel + AI narration
 ```
@@ -69,14 +71,16 @@ critter-plains/
 │   ├── ai/
 │   │   └── Chronicler.kt              # Anthropic API narration of WorldStats, throttled + async
 │   ├── simulation/
-│   │   ├── SimulationController.kt    # Tick throttle, pause, speed, critter selection, owns Chronicler
-│   │   └── WorldData.kt              # Interface for screen-space world queries
+│   │   ├── Camera.kt                  # Sole owner of viewport position (pan) and zoom scale; all world↔screen math
+│   │   ├── SimulationController.kt    # Tick throttle, pause, speed, live critter selection (auto-clears on death), owns Camera + Chronicler
+│   │   └── World.kt                   # Interface for screen-space world queries (e.g. mouse hover)
 │   ├── view/
 │   │   ├── BufferedWorldView.kt       # Renders tiles + critters to off-screen RenderTarget
+│   │   ├── OverlayView.kt             # Screen-space overlay drawn after the blit: memory fog-of-war tint on the selected critter's unexplored tiles
 │   │   ├── HudView.kt                 # Mouse-hover tooltip
 │   │   └── InfoPanel.kt              # Right-side selected-critter details panel + chronicle text
 │   └── input/
-│       └── InputHandler.kt            # Space = pause/resume; click = select critter
+│       └── InputHandler.kt            # WASD/arrows = hold-to-pan; scroll/`+`/`-` = zoom; Space = pause/resume; click = select/switch; Escape = deselect
 │
 ├── data/
 │   ├── fonts/default.otf              # Font loaded at runtime
@@ -114,7 +118,8 @@ critter-plains/
 | `Intention` | critters | `EXPLORE`, `EAT` (implemented); `COMMUNICATE`, `PROCREATE` (not yet) |
 | `Territory` | critters | Sealed type. Subtype `Terrain`: `GROUND`, `SOIL`, `FOOD` |
 | `Position` | critters | `data class(x: Int, y: Int)`. Has `distance()` |
-| `SimulationController` | visualization | Bridges OPENRNDR's `seconds` clock to the game loop. Owns pause/speed/selection. |
+| `Camera` | visualization | Sole owner of viewport position and zoom scale (`cellSize`, `viewportX`/`viewportY`). Every world↔screen conversion goes through it. |
+| `SimulationController` | visualization | Bridges OPENRNDR's `seconds` clock to the game loop. Owns pause/speed/selection (re-resolved live every tick, auto-clears on death) and composes `Camera`. |
 | `Chronicler` | visualization | Calls the Anthropic Messages API to narrate `WorldStats` in one sentence. Throttled, async (`Dispatchers.IO`), degrades to a fallback line on any failure. |
 
 ## Development Workflow
@@ -150,7 +155,7 @@ java -jar build/libs/critter-plains-1.0.0-all.jar
 ### Testing
 
 - JUnit is on the test classpath in both subprojects (`testImplementation(libs.junit)`).
-- No test source files exist yet; tests should go in `critters/src/test/kotlin/` or `visualization/src/test/kotlin/`.
+- Tests exist under `visualization/src/test/kotlin/`: `simulation/CameraTest.kt`, `simulation/SimulationControllerTest.kt`, `input/InputHandlerTest.kt`, `ai/ChroniclerTest.kt`, `view/OverlayViewTest.kt`. None yet in `critters/src/test/kotlin/`.
 
 ### Dependency updates
 

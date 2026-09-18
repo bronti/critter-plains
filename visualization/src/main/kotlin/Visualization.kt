@@ -28,7 +28,7 @@ fun runVisualization(game: Game, cellSize: Int, fps: Int, viewportWidth: Int, vi
         val buffer: RenderTarget = renderTarget(viewportWidth, viewportHeight) {
             colorBuffer()
         }
-        val worldView = BufferedWorldView(drawer, controller.world, buffer)
+        val worldView = BufferedWorldView(drawer, buffer)
         val overlayView = OverlayView(drawer)
         val hudView = HudView(drawer, font)
         val infoPanel = InfoPanel(drawer, font, width - INFO_PANEL_WIDTH, INFO_PANEL_WIDTH, height.toDouble())
@@ -41,7 +41,7 @@ fun runVisualization(game: Game, cellSize: Int, fps: Int, viewportWidth: Int, vi
 
             controller.update(seconds)
 
-            worldView.render(cellSize = controller.cellSize, viewportX = controller.viewportX, viewportY = controller.viewportY)
+            worldView.render(state = controller.state, cellSize = controller.cellSize, viewportX = controller.viewportX, viewportY = controller.viewportY)
 
             drawer.image(buffer.colorBuffer(0), 0.0, 0.0, width.toDouble(), height.toDouble())
 
